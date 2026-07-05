@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "ClipMark",
+  "description": "Local-first web highlights with notes and Markdown export.",
+  "version": "0.1.0",
+  "action": {
+    "default_popup": "src/popup/index.html",
+    "default_title": "ClipMark"
+  },
+  "options_page": "src/options/index.html",
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": ["activeTab", "contextMenus", "downloads", "storage", "tabs"],
+  "host_permissions": ["http://*/*", "https://*/*"]
+}

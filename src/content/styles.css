@@ -1,0 +1,125 @@
+.hlp-toolbar,
+.hlp-note-editor {
+  all: initial;
+  position: fixed;
+  z-index: 2147483647;
+  box-sizing: border-box;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.hlp-toolbar {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px;
+  border: 1px solid #d8dee4;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgb(15 23 42 / 18%);
+}
+
+.hlp-toolbar button,
+.hlp-note-editor button {
+  all: initial;
+  box-sizing: border-box;
+  cursor: pointer;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.hlp-toolbar button {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 7px 8px;
+  border: 1px solid #cfd7df;
+  color: #1f2937;
+  background: #f8fafc;
+}
+
+.hlp-toolbar button[data-color="yellow"] {
+  background: #fff08a;
+}
+
+.hlp-toolbar button[data-color="green"] {
+  background: #b8f3c4;
+}
+
+.hlp-toolbar button[data-color="blue"] {
+  background: #b9ddff;
+}
+
+.hlp-toolbar button[data-color="pink"] {
+  background: #ffd0e8;
+}
+
+.hlp-note-editor {
+  width: min(320px, calc(100vw - 24px));
+  padding: 10px;
+  border: 1px solid #d8dee4;
+  border-radius: 8px;
+  color: #111827;
+  background: #ffffff;
+  box-shadow: 0 16px 36px rgb(15 23 42 / 20%);
+}
+
+.hlp-note-editor textarea {
+  all: initial;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  min-height: 96px;
+  padding: 8px;
+  border: 1px solid #cfd7df;
+  border-radius: 6px;
+  color: #111827;
+  background: #ffffff;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.hlp-note-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.hlp-note-editor button {
+  padding: 8px 10px;
+  border: 1px solid #cfd7df;
+  color: #111827;
+  background: #f8fafc;
+}
+
+.hlp-note-editor button[data-variant="danger"] {
+  color: #991b1b;
+  border-color: #fecaca;
+  background: #fff1f2;
+}
+
+mark[data-hlp-id] {
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
+mark[data-hlp-color="yellow"] {
+  background: #fff08a;
+}
+
+mark[data-hlp-color="green"] {
+  background: #b8f3c4;
+}
+
+mark[data-hlp-color="blue"] {
+  background: #b9ddff;
+}
+
+mark[data-hlp-color="pink"] {
+  background: #ffd0e8;
+}
