@@ -8,6 +8,14 @@ import "./styles.css";
 
 const t = (key: string, substitutions?: string[]) => chrome.i18n.getMessage(key, substitutions);
 
+function plainTextLabels() {
+  return {
+    sourceLabel: t("plaintext_source_label"),
+    highlightLabel: t("plaintext_highlight_label"),
+    noteLabel: t("plaintext_note_label")
+  };
+}
+
 function markdownLabels(): MarkdownLabels {
   return {
     untitled: t("markdown_untitled"),
@@ -47,6 +55,24 @@ function sendRefreshMessage(tabId: number): Promise<boolean> {
   });
 }
 
+function pageToPlainText(doc: PageHighlightDoc): string {
+  const labels = plainTextLabels();
+  const lines: string[] = [doc.title, `${labels.sourceLabel}${doc.url}`, ""];
+
+  for (const [index, highlight] of doc.highlights.entries()) {
+    lines.push(`${index + 1}. ${labels.highlightLabel}`);
+    lines.push(highlight.text.trim());
+
+    if (highlight.note.trim()) {
+      lines.push("", labels.noteLabel, highlight.note.trim());
+    }
+
+    lines.push("", "---", "");
+  }
+
+  return lines.join("\n").trimEnd() + "\n";
+}
+
 function downloadMarkdownFile(markdown: string, filename: string): Promise<void> {
   const url = URL.createObjectURL(new Blob([markdown], { type: "text/markdown;charset=utf-8" }));
   return new Promise((resolve) => {
@@ -67,6 +93,7 @@ function HighlightItem({
   onUpdated: (doc: PageHighlightDoc) => void;
 }) {
   const [note, setNote] = useState(highlight.note);
+  const [savedVisible, setSavedVisible] = useState(false);
 
   useEffect(() => {
     setNote(highlight.note);
@@ -76,6 +103,8 @@ function HighlightItem({
     const doc = await updateHighlightNote(pageUrl, highlight.id, note);
     if (doc) {
       onUpdated(doc);
+      setSavedVisible(true);
+      window.setTimeout(() => setSavedVisible(false), 1500);
       const activeTab = await getActiveTab();
       if (activeTab) {
         await sendRefreshMessage(activeTab.id);
@@ -98,9 +127,12 @@ function HighlightItem({
         value={note}
         onChange={(event) => setNote(event.target.value)}
       />
-      <button type="button" onClick={saveNote}>
-        {t("popup_btn_save_note")}
-      </button>
+      <div className="note-actions-inline">
+        <button type="button" onClick={saveNote}>
+          {t("popup_btn_save_note")}
+        </button>
+        {savedVisible ? <span className="note-saved-feedback">{t("popup_status_note_saved")}</span> : null}
+      </div>
     </article>
   );
 }
@@ -131,11 +163,12 @@ function App() {
 
     void load();
     return () => {
-      cancelled = false;
+      cancelled = true;
     };
   }, []);
 
   const markdown = useMemo(() => (doc ? pageToMarkdown(doc, new Date(), markdownLabels()) : ""), [doc]);
+  const plainText = useMemo(() => (doc ? pageToPlainText(doc) : ""), [doc]);
 
   const copyMarkdown = useCallback(async () => {
     if (!markdown) {
@@ -145,6 +178,15 @@ function App() {
     await navigator.clipboard.writeText(markdown);
     setStatus(t("popup_status_copied"));
   }, [markdown]);
+
+  const copyPlainText = useCallback(async () => {
+    if (!plainText) {
+      return;
+    }
+
+    await navigator.clipboard.writeText(plainText);
+    setStatus(t("popup_status_plain_copied"));
+  }, [plainText]);
 
   const downloadMarkdown = useCallback(async () => {
     if (!doc || !markdown) {
@@ -194,6 +236,9 @@ function App() {
       <section className="actions">
         <button type="button" disabled={!hasHighlights} onClick={copyMarkdown}>
           {t("popup_btn_copy")}
+        </button>
+        <button type="button" disabled={!hasHighlights} onClick={copyPlainText}>
+          {t("popup_btn_copy_plain")}
         </button>
         <button type="button" disabled={!hasHighlights} onClick={downloadMarkdown}>
           {t("popup_btn_export")}

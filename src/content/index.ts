@@ -13,7 +13,9 @@ import { normalizeUrl } from "../shared/url";
 
 const HIGHLIGHT_ATTR = "data-hlp-id";
 const ROOT_ATTR = "data-hlp-root";
-const DOT_SIZE = 22;
+const DOT_WIDTH = 28;
+const DOT_HEIGHT = 22;
+const DOT_OFFSET = 8;
 const COLOR_KEYS: HighlightColor[] = ["yellow", "green", "blue", "pink"];
 
 const t = (key: string, substitutions?: string[]) => chrome.i18n.getMessage(key, substitutions);
@@ -34,6 +36,7 @@ let dot: HTMLButtonElement | null = null;
 let toolbar: HTMLDivElement | null = null;
 let noteEditor: HTMLDivElement | null = null;
 let activeDoc: PageHighlightDoc | null = null;
+let isToolbarOpen = false;
 
 function currentUrl(): string {
   return normalizeUrl(window.location.href);
@@ -51,6 +54,7 @@ function removeDot(): void {
 function removeToolbar(): void {
   toolbar?.remove();
   toolbar = null;
+  isToolbarOpen = false;
 }
 
 function removeNoteEditor(): void {
@@ -193,7 +197,29 @@ async function createHighlight(color: HighlightColor): Promise<void> {
   await renderHighlights();
 }
 
+function triggerPositionFromRange(rect: DOMRect): { left: number; top: number } {
+  const hasRightSpace = rect.right + DOT_OFFSET + DOT_WIDTH <= window.innerWidth - 4;
+  const preferredLeft = hasRightSpace ? rect.right + DOT_OFFSET : rect.left - DOT_OFFSET - DOT_WIDTH;
+  const preferredTop = rect.bottom + DOT_OFFSET;
+
+  return {
+    left: Math.min(Math.max(4, preferredLeft), window.innerWidth - DOT_WIDTH - 4),
+    top: Math.min(Math.max(4, preferredTop), window.innerHeight - DOT_HEIGHT - 4)
+  };
+}
+
 async function showDot(): Promise<void> {
+  if (isToolbarOpen) {
+    removeDot();
+    return;
+  }
+
+  const settings = await getSettings();
+  if (settings.selectionTrigger === "contextMenuOnly") {
+    removeDot();
+    return;
+  }
+
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
     removeDot();
@@ -206,16 +232,11 @@ async function showDot(): Promise<void> {
     return;
   }
 
-  const rect = range.getBoundingClientRect();
+  const position = triggerPositionFromRange(range.getBoundingClientRect());
 
-  // Position the dot at the right edge of the selection, vertically centered.
-  const left = Math.min(Math.max(4, rect.right + 4), window.innerWidth - DOT_SIZE - 4);
-  const top = Math.max(4, rect.top + rect.height / 2 - DOT_SIZE / 2);
-
-  // Reuse existing dot if it's already in the DOM — just reposition.
   if (dot) {
-    dot.style.left = `${left}px`;
-    dot.style.top = `${top}px`;
+    dot.style.left = `${position.left}px`;
+    dot.style.top = `${position.top}px`;
     return;
   }
 
@@ -225,8 +246,9 @@ async function showDot(): Promise<void> {
   dot.setAttribute(ROOT_ATTR, "dot");
   dot.title = t("content_dot_title");
   dot.setAttribute("aria-label", t("content_dot_title"));
-  dot.style.left = `${left}px`;
-  dot.style.top = `${top}px`;
+  dot.textContent = "C";
+  dot.style.left = `${position.left}px`;
+  dot.style.top = `${position.top}px`;
   dot.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -261,6 +283,7 @@ async function showToolbar(): Promise<void> {
   toolbar.setAttribute(ROOT_ATTR, "toolbar");
   toolbar.style.left = `${position.left}px`;
   toolbar.style.top = `${position.top}px`;
+  isToolbarOpen = true;
 
   for (const color of COLOR_KEYS) {
     const button = document.createElement("button");
@@ -326,10 +349,23 @@ function showNoteEditor(highlight: Highlight, target: Element): void {
   textarea.placeholder = t("content_editor_placeholder");
 
   let saveTimer: ReturnType<typeof setTimeout> | null = null;
+  let lastSavedNote = highlight.note;
 
   const saveNote = async () => {
+    if (textarea.value === lastSavedNote) {
+      return;
+    }
     await updateHighlightNote(currentUrl(), highlight.id, textarea.value);
+    lastSavedNote = textarea.value;
     await renderHighlights();
+  };
+
+  const flushSave = () => {
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      saveTimer = null;
+    }
+    void saveNote();
   };
 
   textarea.addEventListener("input", () => {
@@ -338,6 +374,7 @@ function showNoteEditor(highlight: Highlight, target: Element): void {
     }
     saveTimer = setTimeout(() => void saveNote(), 600);
   });
+  textarea.addEventListener("blur", flushSave);
 
   const actions = document.createElement("div");
   actions.className = "hlp-note-actions";
@@ -359,12 +396,8 @@ function showNoteEditor(highlight: Highlight, target: Element): void {
   const doneButton = document.createElement("button");
   doneButton.type = "button";
   doneButton.textContent = t("content_btn_done");
-  doneButton.addEventListener("click", async () => {
-    if (saveTimer) {
-      clearTimeout(saveTimer);
-      saveTimer = null;
-    }
-    await saveNote();
+  doneButton.addEventListener("click", () => {
+    flushSave();
     removeNoteEditor();
   });
 
@@ -425,8 +458,12 @@ async function init(): Promise<void> {
     }
   });
 
-  document.addEventListener("mouseup", () => {
+  document.addEventListener("mouseup", (event) => {
     isMouseDown = false;
+    const target = event.target as Element | null;
+    if (isToolbarOpen || target?.closest(`[${ROOT_ATTR}]`)) {
+      return;
+    }
     window.setTimeout(() => void showDot(), 60);
   });
 

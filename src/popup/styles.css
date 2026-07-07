@@ -82,7 +82,7 @@ button:disabled {
 
 .actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -159,4 +159,16 @@ textarea {
   font: inherit;
   font-size: 13px;
   line-height: 1.4;
+}
+
+.note-actions-inline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.note-saved-feedback {
+  color: #4f6f61;
+  font-size: 12px;
+  line-height: 1.2;
 }

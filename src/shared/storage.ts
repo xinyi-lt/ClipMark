@@ -6,7 +6,8 @@ const SETTINGS_KEY = "hlp:settings";
 
 const DEFAULT_SETTINGS: UserSettings = {
   defaultColor: "yellow",
-  fileNameTemplate: "{date}-{title}.md"
+  fileNameTemplate: "{date}-{title}.md",
+  selectionTrigger: "dot"
 };
 
 function pageKey(url: string): string {

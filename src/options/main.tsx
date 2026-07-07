@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { getSettings, saveSettings } from "../shared/storage";
-import type { HighlightColor, UserSettings } from "../shared/types";
+import type { HighlightColor, SelectionTrigger, UserSettings } from "../shared/types";
 import "./styles.css";
 
 const COLORS: HighlightColor[] = ["yellow", "green", "blue", "pink"];
+const TRIGGERS: SelectionTrigger[] = ["dot", "contextMenuOnly"];
 
 const t = (key: string, substitutions?: string[]) => chrome.i18n.getMessage(key, substitutions);
 
@@ -30,6 +31,10 @@ function App() {
 
   const updateColor = useCallback((defaultColor: HighlightColor) => {
     setSettings((current) => (current ? { ...current, defaultColor } : current));
+  }, []);
+
+  const updateTrigger = useCallback((selectionTrigger: SelectionTrigger) => {
+    setSettings((current) => (current ? { ...current, selectionTrigger } : current));
   }, []);
 
   const save = useCallback(async () => {
@@ -64,6 +69,24 @@ function App() {
           ))}
         </div>
       </section>
+
+      <section>
+        <h2>{t("options_heading_trigger")}</h2>
+        <div className="segmented-control">
+          {TRIGGERS.map((trigger) => (
+            <button
+              key={trigger}
+              type="button"
+              aria-pressed={settings.selectionTrigger === trigger}
+              onClick={() => updateTrigger(trigger)}
+            >
+              {t(`options_trigger_${trigger}`)}
+            </button>
+          ))}
+        </div>
+        <p>{t("options_trigger_hint")}</p>
+      </section>
+
 
       <section>
         <h2>{t("options_heading_filename")}</h2>

@@ -16,7 +16,7 @@
     "message": "已复制 Markdown。"
   },
   "popup_status_refreshing": {
-    "message": "刷新中\u2026"
+    "message": "刷新中…"
   },
   "popup_status_refreshed": {
     "message": "已刷新本页高亮。"
@@ -102,7 +102,8 @@
     "description": "$1 为颜色名，$2 为该颜色的含义，如“黄色 — 核心、重点”。"
   },
   "content_dot_title": {
-    "message": "高亮或复制"
+    "message": "ClipMark",
+    "description": "选中文字后小触发器的提示和无障碍标签。"
   },
   "content_mark_title_note": {
     "message": "备注：$1",
@@ -154,6 +155,36 @@
     "message": "## 高亮"
   },
   "markdown_note_label": {
+    "message": "备注："
+  },
+  "options_heading_trigger": {
+    "message": "选区触发方式"
+  },
+  "options_trigger_dot": {
+    "message": "显示小触发器"
+  },
+  "options_trigger_contextMenuOnly": {
+    "message": "仅右键菜单"
+  },
+  "options_trigger_hint": {
+    "message": "如果多个扩展都会响应选中文字，可改为仅使用右键菜单。"
+  },
+  "popup_status_note_saved": {
+    "message": "备注已保存。"
+  },
+  "popup_status_plain_copied": {
+    "message": "已复制纯文本。"
+  },
+  "popup_btn_copy_plain": {
+    "message": "复制文本"
+  },
+  "plaintext_source_label": {
+    "message": "来源："
+  },
+  "plaintext_highlight_label": {
+    "message": "高亮："
+  },
+  "plaintext_note_label": {
     "message": "备注："
   }
 }

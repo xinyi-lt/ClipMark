@@ -94,3 +94,24 @@ p {
 .status {
   color: #0f766e;
 }
+.segmented-control {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid #cfd7df;
+  border-radius: 8px;
+  background: #eef2f7;
+}
+
+.segmented-control button {
+  min-height: 34px;
+  border-color: transparent;
+  background: transparent;
+}
+
+.segmented-control button[aria-pressed="true"] {
+  color: #ffffff;
+  background: #172033;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 20%);
+}

@@ -16,7 +16,7 @@
     "message": "Markdown copied."
   },
   "popup_status_refreshing": {
-    "message": "Refreshing\u2026"
+    "message": "Refreshing…"
   },
   "popup_status_refreshed": {
     "message": "Highlights refreshed."
@@ -102,7 +102,8 @@
     "description": "$1 is the color name, $2 is its meaning, e.g. 'Yellow — Key points'."
   },
   "content_dot_title": {
-    "message": "Highlight or copy"
+    "message": "ClipMark",
+    "description": "Tooltip and aria label for the small selection trigger."
   },
   "content_mark_title_note": {
     "message": "Note: $1",
@@ -155,5 +156,35 @@
   },
   "markdown_note_label": {
     "message": "Note: "
+  },
+  "options_heading_trigger": {
+    "message": "Selection trigger"
+  },
+  "options_trigger_dot": {
+    "message": "Show small trigger"
+  },
+  "options_trigger_contextMenuOnly": {
+    "message": "Context menu only"
+  },
+  "options_trigger_hint": {
+    "message": "Use context menu only if several extensions compete for selected text."
+  },
+  "popup_status_note_saved": {
+    "message": "Note saved."
+  },
+  "popup_status_plain_copied": {
+    "message": "Plain text copied."
+  },
+  "popup_btn_copy_plain": {
+    "message": "Copy Text"
+  },
+  "plaintext_source_label": {
+    "message": "Source: "
+  },
+  "plaintext_highlight_label": {
+    "message": "Highlight:"
+  },
+  "plaintext_note_label": {
+    "message": "Note:"
   }
 }

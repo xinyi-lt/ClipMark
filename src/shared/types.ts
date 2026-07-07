@@ -1,4 +1,5 @@
 export type HighlightColor = "yellow" | "green" | "blue" | "pink";
+export type SelectionTrigger = "dot" | "contextMenuOnly";
 
 export type TextQuoteSelector = {
   exact: string;
@@ -31,6 +32,7 @@ export type PageHighlightDoc = {
 export type UserSettings = {
   defaultColor: HighlightColor;
   fileNameTemplate: string;
+  selectionTrigger: SelectionTrigger;
 };
 
 export type ContentMessage =
