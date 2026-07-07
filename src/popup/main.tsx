@@ -89,7 +89,7 @@ function HighlightItem({
     <article className="highlight-item">
       <div className="highlight-meta">
         <span className={`color-dot color-${highlight.color}`} />
-        <span>{highlight.isOrphaned ? t("popup_highlight_orphaned") : t("popup_highlight_on_page")}</span>
+        {highlight.isOrphaned ? <span>{t("popup_highlight_orphaned")}</span> : null}
       </div>
       <blockquote>{highlight.text}</blockquote>
       <textarea

@@ -57,6 +57,28 @@
   background: #ffd0e8;
 }
 
+.hlp-dot {
+  all: initial;
+  color-scheme: light;
+  position: fixed;
+  z-index: 2147483647;
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid #334155;
+  background: #475569;
+  box-shadow: 0 2px 8px rgb(15 23 42 / 12%);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.hlp-dot:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgb(71 85 105 / 40%);
+  border-color: #334155;
+}
+
 .hlp-toolbar-divider {
   width: 1px;
   align-self: stretch;

@@ -13,6 +13,7 @@ import { normalizeUrl } from "../shared/url";
 
 const HIGHLIGHT_ATTR = "data-hlp-id";
 const ROOT_ATTR = "data-hlp-root";
+const DOT_SIZE = 22;
 const COLOR_KEYS: HighlightColor[] = ["yellow", "green", "blue", "pink"];
 
 const t = (key: string, substitutions?: string[]) => chrome.i18n.getMessage(key, substitutions);
@@ -21,10 +22,15 @@ function colorLabel(color: HighlightColor): string {
   return t(`content_color_${color}`);
 }
 
-function colorTooltip(color: HighlightColor): string {
-  return t("content_color_tooltip", [colorLabel(color)]);
+function colorMeaning(color: HighlightColor): string {
+  return t(`content_meaning_${color}`);
 }
 
+function colorTooltip(color: HighlightColor): string {
+  return t("content_color_tooltip", [colorLabel(color), colorMeaning(color)]);
+}
+
+let dot: HTMLButtonElement | null = null;
 let toolbar: HTMLDivElement | null = null;
 let noteEditor: HTMLDivElement | null = null;
 let activeDoc: PageHighlightDoc | null = null;
@@ -35,6 +41,11 @@ function currentUrl(): string {
 
 function makeId(): string {
   return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function removeDot(): void {
+  dot?.remove();
+  dot = null;
 }
 
 function removeToolbar(): void {
@@ -177,8 +188,53 @@ async function createHighlight(color: HighlightColor): Promise<void> {
 
   await upsertHighlight(currentUrl(), document.title, highlight);
   selection.removeAllRanges();
+  removeDot();
   removeToolbar();
   await renderHighlights();
+}
+
+async function showDot(): Promise<void> {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+    removeDot();
+    return;
+  }
+
+  const range = selection.getRangeAt(0);
+  if (!document.body.contains(range.commonAncestorContainer) || !range.toString().trim()) {
+    removeDot();
+    return;
+  }
+
+  const rect = range.getBoundingClientRect();
+
+  // Position the dot at the right edge of the selection, vertically centered.
+  const left = Math.min(Math.max(4, rect.right + 4), window.innerWidth - DOT_SIZE - 4);
+  const top = Math.max(4, rect.top + rect.height / 2 - DOT_SIZE / 2);
+
+  // Reuse existing dot if it's already in the DOM — just reposition.
+  if (dot) {
+    dot.style.left = `${left}px`;
+    dot.style.top = `${top}px`;
+    return;
+  }
+
+  dot = document.createElement("button");
+  dot.type = "button";
+  dot.className = "hlp-dot";
+  dot.setAttribute(ROOT_ATTR, "dot");
+  dot.title = t("content_dot_title");
+  dot.setAttribute("aria-label", t("content_dot_title"));
+  dot.style.left = `${left}px`;
+  dot.style.top = `${top}px`;
+  dot.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    removeDot();
+    void showToolbar();
+  });
+
+  document.body.appendChild(dot);
 }
 
 async function showToolbar(): Promise<void> {
@@ -345,18 +401,33 @@ function handleDocumentClick(event: MouseEvent): void {
   }
 }
 
+let isMouseDown = false;
+
 async function init(): Promise<void> {
   await renderHighlights();
 
   document.addEventListener("selectionchange", () => {
-    window.setTimeout(() => void showToolbar(), 120);
+    // During mouse drag the selection fires rapidly; wait until the user
+    // releases the mouse before showing the dot to avoid forced reflow
+    // and visual flicker.
+    if (isMouseDown) {
+      return;
+    }
+    window.setTimeout(() => void showDot(), 120);
   });
 
   document.addEventListener("mousedown", (event) => {
+    isMouseDown = true;
     const target = event.target as Element | null;
     if (!target?.closest(`[${ROOT_ATTR}]`)) {
+      removeDot();
       removeToolbar();
     }
+  });
+
+  document.addEventListener("mouseup", () => {
+    isMouseDown = false;
+    window.setTimeout(() => void showDot(), 60);
   });
 
   document.addEventListener("click", handleDocumentClick, true);

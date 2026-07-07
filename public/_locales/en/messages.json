@@ -85,9 +85,24 @@
   "content_color_pink": {
     "message": "Pink"
   },
+  "content_meaning_yellow": {
+    "message": "Key points"
+  },
+  "content_meaning_green": {
+    "message": "Examples, data, quotes"
+  },
+  "content_meaning_blue": {
+    "message": "Objective facts"
+  },
+  "content_meaning_pink": {
+    "message": "Questions, insights"
+  },
   "content_color_tooltip": {
-    "message": "$1 highlight",
-    "description": "$1 is a color name, e.g. 'Yellow highlight'."
+    "message": "$1 — $2",
+    "description": "$1 is the color name, $2 is its meaning, e.g. 'Yellow — Key points'."
+  },
+  "content_dot_title": {
+    "message": "Highlight or copy"
   },
   "content_mark_title_note": {
     "message": "Note: $1",
