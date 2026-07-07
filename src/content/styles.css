@@ -1,6 +1,7 @@
 .hlp-toolbar,
 .hlp-note-editor {
   all: initial;
+  color-scheme: light;
   position: fixed;
   z-index: 2147483647;
   box-sizing: border-box;
@@ -22,6 +23,7 @@
 .hlp-toolbar button,
 .hlp-note-editor button {
   all: initial;
+  color-scheme: light;
   box-sizing: border-box;
   cursor: pointer;
   border-radius: 6px;
@@ -55,6 +57,39 @@
   background: #ffd0e8;
 }
 
+.hlp-toolbar-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 4px 2px;
+  background: #e2e8f0;
+}
+
+.hlp-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 7px;
+  border: 1px solid #cfd7df;
+  color: #1f2937;
+  background: #f8fafc;
+}
+
+.hlp-copy-btn svg {
+  display: block;
+}
+
+.hlp-copy-btn:hover {
+  background: #eef2f7;
+}
+
+.hlp-copy-btn.is-copied {
+  color: #15803d;
+  border-color: #bbf7d0;
+  background: #dcfce7;
+}
+
 .hlp-note-editor {
   width: min(320px, calc(100vw - 24px));
   padding: 10px;
@@ -66,20 +101,25 @@
 }
 
 .hlp-note-editor textarea {
-  all: initial;
-  box-sizing: border-box;
   display: block;
-  width: 100%;
+  width: 100% !important;
+  box-sizing: border-box !important;
   min-height: 96px;
-  padding: 8px;
-  border: 1px solid #cfd7df;
-  border-radius: 6px;
-  color: #111827;
-  background: #ffffff;
-  font-family: inherit;
-  font-size: 13px;
-  line-height: 1.4;
-  white-space: pre-wrap;
+  padding: 8px !important;
+  margin: 0 !important;
+  border: 1px solid #cfd7df !important;
+  border-radius: 6px !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background-color: #ffffff !important;
+  caret-color: #111827 !important;
+  font-family: inherit !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+  white-space: pre-wrap !important;
+  resize: vertical !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
 }
 
 .hlp-note-actions {

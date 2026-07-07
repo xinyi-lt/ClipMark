@@ -13,12 +13,17 @@ import { normalizeUrl } from "../shared/url";
 
 const HIGHLIGHT_ATTR = "data-hlp-id";
 const ROOT_ATTR = "data-hlp-root";
-const COLOR_LABELS: Record<HighlightColor, string> = {
-  yellow: "Yellow",
-  green: "Green",
-  blue: "Blue",
-  pink: "Pink"
-};
+const COLOR_KEYS: HighlightColor[] = ["yellow", "green", "blue", "pink"];
+
+const t = (key: string, substitutions?: string[]) => chrome.i18n.getMessage(key, substitutions);
+
+function colorLabel(color: HighlightColor): string {
+  return t(`content_color_${color}`);
+}
+
+function colorTooltip(color: HighlightColor): string {
+  return t("content_color_tooltip", [colorLabel(color)]);
+}
 
 let toolbar: HTMLDivElement | null = null;
 let noteEditor: HTMLDivElement | null = null;
@@ -90,7 +95,7 @@ function wrapSegment(segment: TextSegment, highlight: Highlight): void {
   const mark = document.createElement("mark");
   mark.setAttribute(HIGHLIGHT_ATTR, highlight.id);
   mark.dataset.hlpColor = highlight.color;
-  mark.title = highlight.note ? `Note: ${highlight.note}` : "Add note";
+  mark.title = highlight.note ? t("content_mark_title_note", [highlight.note]) : t("content_mark_title_add");
 
   selected.parentNode?.insertBefore(mark, selected);
   mark.appendChild(selected);
@@ -190,8 +195,9 @@ async function showToolbar(): Promise<void> {
   }
 
   const settings = await getSettings();
+  const selectedText = range.toString().trim();
   const rect = range.getBoundingClientRect();
-  const position = clampToViewport(rect, 220);
+  const position = clampToViewport(rect, 260);
   removeToolbar();
 
   toolbar = document.createElement("div");
@@ -200,15 +206,44 @@ async function showToolbar(): Promise<void> {
   toolbar.style.left = `${position.left}px`;
   toolbar.style.top = `${position.top}px`;
 
-  for (const color of Object.keys(COLOR_LABELS) as HighlightColor[]) {
+  for (const color of COLOR_KEYS) {
     const button = document.createElement("button");
     button.type = "button";
     button.textContent = color === settings.defaultColor ? "*" : "o";
-    button.title = `${COLOR_LABELS[color]} highlight`;
+    button.title = colorTooltip(color);
     button.dataset.color = color;
     button.addEventListener("click", () => void createHighlight(color));
     toolbar.appendChild(button);
   }
+
+  const divider = document.createElement("span");
+  divider.className = "hlp-toolbar-divider";
+  toolbar.appendChild(divider);
+
+  const copyButton = document.createElement("button");
+  copyButton.type = "button";
+  copyButton.className = "hlp-copy-btn";
+  copyButton.title = t("content_btn_copy");
+  copyButton.setAttribute("aria-label", t("content_btn_copy"));
+  copyButton.innerHTML =
+    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>';
+  copyButton.addEventListener("click", async () => {
+    if (!selectedText) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(selectedText);
+      copyButton.classList.add("is-copied");
+      copyButton.title = t("content_btn_copied");
+      copyButton.innerHTML =
+        '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>';
+      window.setTimeout(() => removeToolbar(), 900);
+    } catch {
+      /* clipboard blocked; keep toolbar so the user can retry */
+    }
+  });
+  toolbar.appendChild(copyButton);
 
   document.body.appendChild(toolbar);
 }
@@ -232,31 +267,52 @@ function showNoteEditor(highlight: Highlight, target: Element): void {
 
   const textarea = document.createElement("textarea");
   textarea.value = highlight.note;
-  textarea.placeholder = "Add a note for this highlight";
+  textarea.placeholder = t("content_editor_placeholder");
+
+  let saveTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const saveNote = async () => {
+    await updateHighlightNote(currentUrl(), highlight.id, textarea.value);
+    await renderHighlights();
+  };
+
+  textarea.addEventListener("input", () => {
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+    }
+    saveTimer = setTimeout(() => void saveNote(), 600);
+  });
 
   const actions = document.createElement("div");
   actions.className = "hlp-note-actions";
 
   const deleteButton = document.createElement("button");
   deleteButton.type = "button";
-  deleteButton.textContent = "Delete";
+  deleteButton.textContent = t("content_btn_delete");
   deleteButton.dataset.variant = "danger";
   deleteButton.addEventListener("click", async () => {
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      saveTimer = null;
+    }
     await deleteHighlight(currentUrl(), highlight.id);
     removeNoteEditor();
     await renderHighlights();
   });
 
-  const saveButton = document.createElement("button");
-  saveButton.type = "button";
-  saveButton.textContent = "Save";
-  saveButton.addEventListener("click", async () => {
-    await updateHighlightNote(currentUrl(), highlight.id, textarea.value);
+  const doneButton = document.createElement("button");
+  doneButton.type = "button";
+  doneButton.textContent = t("content_btn_done");
+  doneButton.addEventListener("click", async () => {
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      saveTimer = null;
+    }
+    await saveNote();
     removeNoteEditor();
-    await renderHighlights();
   });
 
-  actions.append(deleteButton, saveButton);
+  actions.append(deleteButton, doneButton);
   noteEditor.append(textarea, actions);
   document.body.appendChild(noteEditor);
   textarea.focus();

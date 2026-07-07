@@ -1,4 +1,4 @@
-import { copyFile, mkdir } from "node:fs/promises";
+import { copyFile, cp, mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { build as viteBuild } from "vite";
 import react from "@vitejs/plugin-react";
@@ -53,3 +53,4 @@ await viteBuild({
 });
 
 await copyFile("src/content/styles.css", "dist/content.css");
+await cp("public/_locales", "dist/_locales", { recursive: true });

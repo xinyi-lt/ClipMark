@@ -1,0 +1,144 @@
+{
+  "popup_title": {
+    "message": "ClipMark",
+    "description": "Brand name shown in the popup header."
+  },
+  "popup_status_loading": {
+    "message": "Loading"
+  },
+  "popup_status_no_highlights": {
+    "message": "No highlights on this page yet."
+  },
+  "popup_status_open_web_page": {
+    "message": "Open a regular web page to use ClipMark."
+  },
+  "popup_status_copied": {
+    "message": "Markdown copied."
+  },
+  "popup_status_refreshing": {
+    "message": "Refreshing\u2026"
+  },
+  "popup_status_refreshed": {
+    "message": "Highlights refreshed."
+  },
+  "popup_status_refresh_failed": {
+    "message": "Could not reach the page. Reload the tab and try again."
+  },
+  "popup_btn_copy": {
+    "message": "Copy Markdown"
+  },
+  "popup_btn_export": {
+    "message": "Export .md"
+  },
+  "popup_btn_refresh_title": {
+    "message": "Refresh page highlights"
+  },
+  "popup_note_placeholder": {
+    "message": "Add note"
+  },
+  "popup_note_aria": {
+    "message": "Highlight note"
+  },
+  "popup_btn_save_note": {
+    "message": "Save note"
+  },
+  "popup_highlight_on_page": {
+    "message": "On page"
+  },
+  "popup_highlight_orphaned": {
+    "message": "Not found on page"
+  },
+  "popup_section_highlights": {
+    "message": "Current page highlights"
+  },
+  "options_title": {
+    "message": "ClipMark Options"
+  },
+  "options_status_loading": {
+    "message": "Loading"
+  },
+  "options_status_saved": {
+    "message": "Saved."
+  },
+  "options_heading_color": {
+    "message": "Default color"
+  },
+  "options_heading_filename": {
+    "message": "Markdown file name"
+  },
+  "options_tokens_label": {
+    "message": "Available tokens: $1, $2.",
+    "description": "$1 is {date}, $2 is {title}; the tokens themselves are not translated."
+  },
+  "options_btn_save": {
+    "message": "Save options"
+  },
+  "content_color_yellow": {
+    "message": "Yellow"
+  },
+  "content_color_green": {
+    "message": "Green"
+  },
+  "content_color_blue": {
+    "message": "Blue"
+  },
+  "content_color_pink": {
+    "message": "Pink"
+  },
+  "content_color_tooltip": {
+    "message": "$1 highlight",
+    "description": "$1 is a color name, e.g. 'Yellow highlight'."
+  },
+  "content_mark_title_note": {
+    "message": "Note: $1",
+    "description": "$1 is the highlight's note text."
+  },
+  "content_mark_title_add": {
+    "message": "Add note"
+  },
+  "content_editor_placeholder": {
+    "message": "Add a note for this highlight"
+  },
+  "content_btn_delete": {
+    "message": "Delete"
+  },
+  "content_btn_done": {
+    "message": "Done"
+  },
+  "content_btn_save": {
+    "message": "Done"
+  },
+  "content_btn_copy": {
+    "message": "Copy"
+  },
+  "content_btn_copied": {
+    "message": "Copied"
+  },
+  "background_menu_export": {
+    "message": "Export highlights as Markdown"
+  },
+  "manifest_name": {
+    "message": "ClipMark"
+  },
+  "manifest_description": {
+    "message": "Local-first web highlights with notes and Markdown export."
+  },
+  "manifest_action_title": {
+    "message": "ClipMark"
+  },
+  "markdown_untitled": {
+    "message": "Untitled"
+  },
+  "markdown_source_label": {
+    "message": "Source: "
+  },
+  "markdown_exported_label": {
+    "message": "Exported: "
+  },
+  "markdown_highlights_section": {
+    "message": "## Highlights"
+  },
+  "markdown_note_label": {
+    "message": "Note: "
+  }
+}

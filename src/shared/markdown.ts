@@ -1,5 +1,21 @@
 import type { PageHighlightDoc } from "./types";
 
+export type MarkdownLabels = {
+  untitled: string;
+  sourceLabel: string;
+  exportedLabel: string;
+  highlightsSection: string;
+  noteLabel: string;
+};
+
+export const DEFAULT_MARKDOWN_LABELS: MarkdownLabels = {
+  untitled: "Untitled",
+  sourceLabel: "Source: ",
+  exportedLabel: "Exported: ",
+  highlightsSection: "## Highlights",
+  noteLabel: "Note: "
+};
+
 function escapeMarkdownBlockquote(text: string): string {
   return text
     .replace(/\r\n/g, "\n")
@@ -13,14 +29,18 @@ function escapeInline(value: string): string {
   return value.replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
 }
 
-export function pageToMarkdown(doc: PageHighlightDoc, exportedAt = new Date()): string {
+export function pageToMarkdown(
+  doc: PageHighlightDoc,
+  exportedAt = new Date(),
+  labels: MarkdownLabels = DEFAULT_MARKDOWN_LABELS
+): string {
   const lines: string[] = [
-    `# ${escapeInline(doc.title || "Untitled")}`,
+    `# ${escapeInline(doc.title || labels.untitled)}`,
     "",
-    `Source: ${doc.url}`,
-    `Exported: ${exportedAt.toISOString()}`,
+    `${labels.sourceLabel}${doc.url}`,
+    `${labels.exportedLabel}${exportedAt.toISOString()}`,
     "",
-    "## Highlights",
+    labels.highlightsSection,
     ""
   ];
 
@@ -28,7 +48,7 @@ export function pageToMarkdown(doc: PageHighlightDoc, exportedAt = new Date()): 
     lines.push(escapeMarkdownBlockquote(highlight.text));
 
     if (highlight.note.trim()) {
-      lines.push("", `Note: ${escapeInline(highlight.note)}`);
+      lines.push("", `${labels.noteLabel}${escapeInline(highlight.note)}`);
     }
 
     lines.push("", "---", "");

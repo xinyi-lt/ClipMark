@@ -1,11 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "ClipMark",
-  "description": "Local-first web highlights with notes and Markdown export.",
+  "default_locale": "en",
+  "name": "__MSG_manifest_name__",
+  "description": "__MSG_manifest_description__",
   "version": "0.1.0",
   "action": {
     "default_popup": "src/popup/index.html",
-    "default_title": "ClipMark"
+    "default_title": "__MSG_manifest_action_title__"
   },
   "options_page": "src/options/index.html",
   "background": {

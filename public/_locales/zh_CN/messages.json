@@ -1,0 +1,144 @@
+{
+  "popup_title": {
+    "message": "ClipMark",
+    "description": "品牌名，不翻译。"
+  },
+  "popup_status_loading": {
+    "message": "加载中"
+  },
+  "popup_status_no_highlights": {
+    "message": "本页暂无高亮。"
+  },
+  "popup_status_open_web_page": {
+    "message": "请在普通网页中打开 ClipMark。"
+  },
+  "popup_status_copied": {
+    "message": "已复制 Markdown。"
+  },
+  "popup_status_refreshing": {
+    "message": "刷新中\u2026"
+  },
+  "popup_status_refreshed": {
+    "message": "已刷新本页高亮。"
+  },
+  "popup_status_refresh_failed": {
+    "message": "无法连接到页面，请重新加载该标签页后再试。"
+  },
+  "popup_btn_copy": {
+    "message": "复制 Markdown"
+  },
+  "popup_btn_export": {
+    "message": "导出 .md"
+  },
+  "popup_btn_refresh_title": {
+    "message": "刷新本页高亮"
+  },
+  "popup_note_placeholder": {
+    "message": "添加备注"
+  },
+  "popup_note_aria": {
+    "message": "高亮备注"
+  },
+  "popup_btn_save_note": {
+    "message": "保存备注"
+  },
+  "popup_highlight_on_page": {
+    "message": "页内"
+  },
+  "popup_highlight_orphaned": {
+    "message": "页内未找到"
+  },
+  "popup_section_highlights": {
+    "message": "当前页高亮"
+  },
+  "options_title": {
+    "message": "ClipMark 设置"
+  },
+  "options_status_loading": {
+    "message": "加载中"
+  },
+  "options_status_saved": {
+    "message": "已保存。"
+  },
+  "options_heading_color": {
+    "message": "默认颜色"
+  },
+  "options_heading_filename": {
+    "message": "Markdown 文件名"
+  },
+  "options_tokens_label": {
+    "message": "可用占位符：$1、$2。",
+    "description": "$1 为 {date}，$2 为 {title}；占位符本身不翻译。"
+  },
+  "options_btn_save": {
+    "message": "保存设置"
+  },
+  "content_color_yellow": {
+    "message": "黄色"
+  },
+  "content_color_green": {
+    "message": "绿色"
+  },
+  "content_color_blue": {
+    "message": "蓝色"
+  },
+  "content_color_pink": {
+    "message": "粉色"
+  },
+  "content_color_tooltip": {
+    "message": "$1高亮",
+    "description": "$1 为颜色名，如“黄色高亮”。"
+  },
+  "content_mark_title_note": {
+    "message": "备注：$1",
+    "description": "$1 为高亮的备注内容。"
+  },
+  "content_mark_title_add": {
+    "message": "添加备注"
+  },
+  "content_editor_placeholder": {
+    "message": "为此高亮添加备注"
+  },
+  "content_btn_delete": {
+    "message": "删除"
+  },
+  "content_btn_done": {
+    "message": "完成"
+  },
+  "content_btn_save": {
+    "message": "完成"
+  },
+  "content_btn_copy": {
+    "message": "复制"
+  },
+  "content_btn_copied": {
+    "message": "已复制"
+  },
+  "background_menu_export": {
+    "message": "将高亮导出为 Markdown"
+  },
+  "manifest_name": {
+    "message": "ClipMark"
+  },
+  "manifest_description": {
+    "message": "本地优先的网页高亮工具，支持逐条备注与 Markdown 导出。"
+  },
+  "manifest_action_title": {
+    "message": "ClipMark"
+  },
+  "markdown_untitled": {
+    "message": "无标题"
+  },
+  "markdown_source_label": {
+    "message": "来源："
+  },
+  "markdown_exported_label": {
+    "message": "导出时间："
+  },
+  "markdown_highlights_section": {
+    "message": "## 高亮"
+  },
+  "markdown_note_label": {
+    "message": "备注："
+  }
+}

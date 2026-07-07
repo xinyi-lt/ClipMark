@@ -6,9 +6,20 @@ import "./styles.css";
 
 const COLORS: HighlightColor[] = ["yellow", "green", "blue", "pink"];
 
+const t = (key: string, substitutions?: string[]) => chrome.i18n.getMessage(key, substitutions);
+
+function colorLabel(color: HighlightColor): string {
+  return t(`content_color_${color}`);
+}
+
+if (typeof document !== "undefined") {
+  document.documentElement.lang = chrome.i18n.getUILanguage();
+  document.title = t("options_title");
+}
+
 function App() {
   const [settings, setSettings] = useState<UserSettings | null>(null);
-  const [status, setStatus] = useState("Loading");
+  const [status, setStatus] = useState(t("options_status_loading"));
 
   useEffect(() => {
     void getSettings().then((loaded) => {
@@ -27,7 +38,7 @@ function App() {
     }
 
     await saveSettings(settings);
-    setStatus("Saved.");
+    setStatus(t("options_status_saved"));
   }, [settings]);
 
   if (!settings) {
@@ -36,10 +47,10 @@ function App() {
 
   return (
     <main>
-      <h1>ClipMark Options</h1>
+      <h1>{t("options_title")}</h1>
 
       <section>
-        <h2>Default color</h2>
+        <h2>{t("options_heading_color")}</h2>
         <div className="color-row">
           {COLORS.map((color) => (
             <button
@@ -47,7 +58,7 @@ function App() {
               type="button"
               className={`swatch swatch-${color}`}
               aria-pressed={settings.defaultColor === color}
-              title={color}
+              title={colorLabel(color)}
               onClick={() => updateColor(color)}
             />
           ))}
@@ -55,16 +66,16 @@ function App() {
       </section>
 
       <section>
-        <h2>Markdown file name</h2>
+        <h2>{t("options_heading_filename")}</h2>
         <input
           value={settings.fileNameTemplate}
           onChange={(event) => setSettings({ ...settings, fileNameTemplate: event.target.value })}
         />
-        <p>Available tokens: {"{date}"}, {"{title}"}.</p>
+        <p>{t("options_tokens_label", ["{date}", "{title}"])}</p>
       </section>
 
       <button type="button" onClick={save}>
-        Save options
+        {t("options_btn_save")}
       </button>
       {status ? <p className="status">{status}</p> : null}
     </main>

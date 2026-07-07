@@ -1,10 +1,27 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { pageToMarkdown } from "../shared/markdown";
+import { pageToMarkdown, type MarkdownLabels } from "../shared/markdown";
 import { getPageDoc, getSettings, updateHighlightNote } from "../shared/storage";
 import type { Highlight, PageHighlightDoc } from "../shared/types";
 import { makeMarkdownFileName, normalizeUrl } from "../shared/url";
 import "./styles.css";
+
+const t = (key: string, substitutions?: string[]) => chrome.i18n.getMessage(key, substitutions);
+
+function markdownLabels(): MarkdownLabels {
+  return {
+    untitled: t("markdown_untitled"),
+    sourceLabel: t("markdown_source_label"),
+    exportedLabel: t("markdown_exported_label"),
+    highlightsSection: t("markdown_highlights_section"),
+    noteLabel: t("markdown_note_label")
+  };
+}
+
+if (typeof document !== "undefined") {
+  document.documentElement.lang = chrome.i18n.getUILanguage();
+  document.title = t("popup_title");
+}
 
 type ActiveTab = {
   id: number;
@@ -20,9 +37,13 @@ async function getActiveTab(): Promise<ActiveTab | null> {
   return tab?.id && tab.url && /^https?:\/\//.test(tab.url) ? { id: tab.id, url: normalizeUrl(tab.url) } : null;
 }
 
-function sendRefreshMessage(tabId: number): Promise<void> {
+function sendRefreshMessage(tabId: number): Promise<boolean> {
   return new Promise((resolve) => {
-    chrome.tabs.sendMessage(tabId, { type: "HLP_REFRESH" }, () => resolve());
+    chrome.tabs.sendMessage(tabId, { type: "HLP_REFRESH" }, () => {
+      // content script may be absent (page just reloaded, restricted URL);
+      // resolve false so the caller can surface that instead of failing silently.
+      resolve(!chrome.runtime.lastError);
+    });
   });
 }
 
@@ -58,6 +79,8 @@ function HighlightItem({
       const activeTab = await getActiveTab();
       if (activeTab) {
         await sendRefreshMessage(activeTab.id);
+        // ignore the boolean: note save still succeeded even if the page
+        // can't be refreshed right now.
       }
     }
   }, [highlight.id, note, onUpdated, pageUrl]);
@@ -66,17 +89,17 @@ function HighlightItem({
     <article className="highlight-item">
       <div className="highlight-meta">
         <span className={`color-dot color-${highlight.color}`} />
-        <span>{highlight.isOrphaned ? "Not found on page" : "On page"}</span>
+        <span>{highlight.isOrphaned ? t("popup_highlight_orphaned") : t("popup_highlight_on_page")}</span>
       </div>
       <blockquote>{highlight.text}</blockquote>
       <textarea
-        aria-label="Highlight note"
-        placeholder="Add note"
+        aria-label={t("popup_note_aria")}
+        placeholder={t("popup_note_placeholder")}
         value={note}
         onChange={(event) => setNote(event.target.value)}
       />
       <button type="button" onClick={saveNote}>
-        Save note
+        {t("popup_btn_save_note")}
       </button>
     </article>
   );
@@ -85,7 +108,8 @@ function HighlightItem({
 function App() {
   const [tab, setTab] = useState<ActiveTab | null>(null);
   const [doc, setDoc] = useState<PageHighlightDoc | null>(null);
-  const [status, setStatus] = useState("Loading");
+  const [status, setStatus] = useState(t("popup_status_loading"));
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -93,7 +117,7 @@ function App() {
     async function load() {
       const activeTab = await getActiveTab();
       if (!activeTab) {
-        setStatus("Open a regular web page to use ClipMark.");
+        setStatus(t("popup_status_open_web_page"));
         return;
       }
 
@@ -101,17 +125,17 @@ function App() {
       if (!cancelled) {
         setTab(activeTab);
         setDoc(pageDoc);
-        setStatus(pageDoc ? "" : "No highlights on this page yet.");
+        setStatus(pageDoc ? "" : t("popup_status_no_highlights"));
       }
     }
 
     void load();
     return () => {
-      cancelled = true;
+      cancelled = false;
     };
   }, []);
 
-  const markdown = useMemo(() => (doc ? pageToMarkdown(doc) : ""), [doc]);
+  const markdown = useMemo(() => (doc ? pageToMarkdown(doc, new Date(), markdownLabels()) : ""), [doc]);
 
   const copyMarkdown = useCallback(async () => {
     if (!markdown) {
@@ -119,7 +143,7 @@ function App() {
     }
 
     await navigator.clipboard.writeText(markdown);
-    setStatus("Markdown copied.");
+    setStatus(t("popup_status_copied"));
   }, [markdown]);
 
   const downloadMarkdown = useCallback(async () => {
@@ -136,9 +160,15 @@ function App() {
       return;
     }
 
-    await sendRefreshMessage(tab.id);
+    setRefreshing(true);
+    const reached = await sendRefreshMessage(tab.id);
     const pageDoc = await getPageDoc(tab.url);
     setDoc(pageDoc);
+    setRefreshing(false);
+    setStatus(reached ? t("popup_status_refreshed") : t("popup_status_refresh_failed"));
+    if (reached) {
+      window.setTimeout(() => setStatus(""), 1500);
+    }
   }, [tab]);
 
   const hasHighlights = Boolean(doc?.highlights.length);
@@ -147,26 +177,32 @@ function App() {
     <main>
       <header>
         <div>
-          <h1>ClipMark</h1>
+          <h1>{t("popup_title")}</h1>
           <p>{doc?.title ?? status}</p>
         </div>
-        <button type="button" className="icon-button" title="Refresh page highlights" onClick={refreshPage}>
+        <button
+          type="button"
+          className={`icon-button${refreshing ? " is-spinning" : ""}`}
+          title={t("popup_btn_refresh_title")}
+          disabled={refreshing}
+          onClick={refreshPage}
+        >
           R
         </button>
       </header>
 
       <section className="actions">
         <button type="button" disabled={!hasHighlights} onClick={copyMarkdown}>
-          Copy Markdown
+          {t("popup_btn_copy")}
         </button>
         <button type="button" disabled={!hasHighlights} onClick={downloadMarkdown}>
-          Export .md
+          {t("popup_btn_export")}
         </button>
       </section>
 
       {status ? <p className="status">{status}</p> : null}
 
-      <section className="list" aria-label="Current page highlights">
+      <section className="list" aria-label={t("popup_section_highlights")}>
         {doc?.highlights.map((highlight) => (
           <HighlightItem key={highlight.id} highlight={highlight} pageUrl={doc.url} onUpdated={setDoc} />
         ))}
