@@ -133,6 +133,9 @@
   "background_menu_export": {
     "message": "Export highlights as Markdown"
   },
+  "background_menu_highlight": {
+    "message": "Highlight with ClipMark"
+  },
   "manifest_name": {
     "message": "ClipMark"
   },
@@ -167,7 +170,7 @@
     "message": "Context menu only"
   },
   "options_trigger_hint": {
-    "message": "Use context menu only if several extensions compete for selected text."
+    "message": "Hide the selection overlay and save highlights from the right-click menu instead."
   },
   "popup_status_note_saved": {
     "message": "Note saved."

@@ -37,6 +37,7 @@ let toolbar: HTMLDivElement | null = null;
 let noteEditor: HTMLDivElement | null = null;
 let activeDoc: PageHighlightDoc | null = null;
 let isToolbarOpen = false;
+let contextMenuRange: Range | null = null;
 
 function currentUrl(): string {
   return normalizeUrl(window.location.href);
@@ -160,20 +161,32 @@ async function renderHighlights(): Promise<void> {
   }
 }
 
-async function createHighlight(color: HighlightColor): Promise<void> {
+function rangeElement(range: Range): Element | null {
+  return range.commonAncestorContainer instanceof Element
+    ? range.commonAncestorContainer
+    : range.commonAncestorContainer.parentElement;
+}
+
+function isHighlightableRange(range: Range): boolean {
+  const element = rangeElement(range);
+  return Boolean(
+    document.body.contains(range.commonAncestorContainer) &&
+      range.toString().trim() &&
+      element &&
+      !element.closest(
+        `[${ROOT_ATTR}], input, textarea, select, option, [contenteditable]:not([contenteditable="false"])`
+      )
+  );
+}
+
+async function createHighlight(
+  color: HighlightColor,
+  requestedRange?: Range | null
+): Promise<PageHighlightDoc | null> {
   const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
-    return;
-  }
-
-  const range = selection.getRangeAt(0);
-  if (!document.body.contains(range.commonAncestorContainer)) {
-    return;
-  }
-
-  const exact = range.toString().trim();
-  if (!exact) {
-    return;
+  const range = requestedRange ?? (selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null);
+  if (!range || !isHighlightableRange(range)) {
+    return null;
   }
 
   const selector = createSelectorFromRange(document.body, range);
@@ -191,10 +204,11 @@ async function createHighlight(color: HighlightColor): Promise<void> {
   };
 
   await upsertHighlight(currentUrl(), document.title, highlight);
-  selection.removeAllRanges();
+  selection?.removeAllRanges();
   removeDot();
   removeToolbar();
   await renderHighlights();
+  return activeDoc;
 }
 
 function triggerPositionFromRange(rect: DOMRect): { left: number; top: number } {
@@ -467,6 +481,17 @@ async function init(): Promise<void> {
     window.setTimeout(() => void showDot(), 60);
   });
 
+  document.addEventListener("contextmenu", () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+      contextMenuRange = null;
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    contextMenuRange = isHighlightableRange(range) ? range.cloneRange() : null;
+  });
+
   document.addEventListener("click", handleDocumentClick, true);
 
   chrome.runtime.onMessage.addListener(
@@ -478,6 +503,20 @@ async function init(): Promise<void> {
 
       if (message.type === "HLP_GET_PAGE_STATE") {
         void getPageDoc(currentUrl()).then((doc) => sendResponse({ ok: true, doc }));
+        return true;
+      }
+
+      if (message.type === "HLP_CREATE_HIGHLIGHT") {
+        const range = contextMenuRange;
+        contextMenuRange = null;
+        void getSettings()
+          .then((settings) => createHighlight(settings.defaultColor, range))
+          .then((doc) =>
+            sendResponse(doc ? { ok: true, doc } : { ok: false, error: "No valid text selection." })
+          )
+          .catch((error: unknown) =>
+            sendResponse({ ok: false, error: error instanceof Error ? error.message : String(error) })
+          );
         return true;
       }
 

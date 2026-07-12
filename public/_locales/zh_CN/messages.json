@@ -133,6 +133,9 @@
   "background_menu_export": {
     "message": "将高亮导出为 Markdown"
   },
+  "background_menu_highlight": {
+    "message": "使用 ClipMark 高亮"
+  },
   "manifest_name": {
     "message": "ClipMark"
   },
@@ -167,7 +170,7 @@
     "message": "仅右键菜单"
   },
   "options_trigger_hint": {
-    "message": "如果多个扩展都会响应选中文字，可改为仅使用右键菜单。"
+    "message": "隐藏选区浮层，改为通过右键菜单保存高亮。"
   },
   "popup_status_note_saved": {
     "message": "备注已保存。"

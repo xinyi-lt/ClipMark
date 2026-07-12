@@ -37,7 +37,8 @@ export type UserSettings = {
 
 export type ContentMessage =
   | { type: "HLP_REFRESH" }
-  | { type: "HLP_GET_PAGE_STATE" };
+  | { type: "HLP_GET_PAGE_STATE" }
+  | { type: "HLP_CREATE_HIGHLIGHT" };
 
 export type ContentResponse =
   | { ok: true; doc: PageHighlightDoc | null }

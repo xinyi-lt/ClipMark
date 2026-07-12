@@ -1,6 +1,11 @@
 import { getPageDoc, getSettings } from "../shared/storage";
 import { pageToMarkdown, type MarkdownLabels } from "../shared/markdown";
 import { makeMarkdownFileName, normalizeUrl } from "../shared/url";
+import type { ContentMessage } from "../shared/types";
+
+const HIGHLIGHT_MENU_ID = "hlp-highlight-selection";
+const EXPORT_MENU_ID = "hlp-export-markdown";
+const WEB_PAGE_PATTERNS = ["http://*/*", "https://*/*"];
 
 const t = (key: string, substitutions?: string[]) => chrome.i18n.getMessage(key, substitutions);
 
@@ -21,16 +26,39 @@ function downloadMarkdown(markdown: string, filename: string): Promise<void> {
   });
 }
 
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({
-    id: "hlp-export-markdown",
-    title: t("background_menu_export"),
-    contexts: ["page"]
+function registerContextMenus(): void {
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({
+      id: HIGHLIGHT_MENU_ID,
+      title: t("background_menu_highlight"),
+      contexts: ["selection"],
+      documentUrlPatterns: WEB_PAGE_PATTERNS
+    });
+    chrome.contextMenus.create({
+      id: EXPORT_MENU_ID,
+      title: t("background_menu_export"),
+      contexts: ["page"],
+      documentUrlPatterns: WEB_PAGE_PATTERNS
+    });
   });
+}
+
+chrome.runtime.onInstalled.addListener(() => {
+  registerContextMenus();
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (info.menuItemId !== "hlp-export-markdown" || !tab?.url) {
+  if (info.menuItemId === HIGHLIGHT_MENU_ID) {
+    if (tab?.id === undefined) {
+      return;
+    }
+
+    const message: ContentMessage = { type: "HLP_CREATE_HIGHLIGHT" };
+    chrome.tabs.sendMessage(tab.id, message, () => void chrome.runtime.lastError);
+    return;
+  }
+
+  if (info.menuItemId !== EXPORT_MENU_ID || !tab?.url) {
     return;
   }
 
